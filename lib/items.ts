@@ -61,7 +61,10 @@ export async function fetchItemsFiltered(params: {
   }
   if (params.category?.trim()) {
     const c = params.category.trim().toLowerCase();
-    list = list.filter((i) => i.category.toLowerCase().includes(c));
+    list = list.filter(
+      (i) =>
+        i.category.toLowerCase() === c || i.category.toLowerCase().includes(c)
+    );
   }
   if (params.search?.trim()) {
     const s = params.search.trim().toLowerCase();

@@ -12,7 +12,9 @@ type Props = {
 export function EmptyState({ title, hint, icon = 'file-tray-outline' }: Props) {
   return (
     <View style={styles.wrap}>
-      <Ionicons name={icon} size={48} color={AppTheme.textMuted} />
+      <View style={styles.iconWrap}>
+        <Ionicons name={icon} size={40} color={AppTheme.primary} />
+      </View>
       <Text style={styles.title}>{title}</Text>
       {hint ? <Text style={styles.hint}>{hint}</Text> : null}
     </View>
@@ -23,10 +25,27 @@ const styles = StyleSheet.create({
   wrap: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 48,
-    paddingHorizontal: 24,
-    gap: 8,
+    paddingVertical: 56,
+    paddingHorizontal: 28,
+    gap: 10,
   },
-  title: { fontSize: 17, fontWeight: '600', color: AppTheme.primaryDark, textAlign: 'center' },
-  hint: { fontSize: 14, color: AppTheme.textMuted, textAlign: 'center' },
+  iconWrap: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: AppTheme.surfaceCard,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: AppTheme.border,
+    ...AppTheme.softShadow,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: AppTheme.primaryDark,
+    textAlign: 'center',
+  },
+  hint: { fontSize: 14, color: AppTheme.textSecondary, textAlign: 'center', lineHeight: 21 },
 });

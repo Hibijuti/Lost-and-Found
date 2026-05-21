@@ -1,5 +1,6 @@
 import { AppButton } from '@/components/lf/AppButton';
 import { AppTextField } from '@/components/lf/AppTextField';
+import { AuthHero } from '@/components/lf/AuthHero';
 import { AppTheme } from '@/constants/appTheme';
 import { useAuth } from '@/context/AuthContext';
 import type { Href } from 'expo-router';
@@ -47,40 +48,44 @@ export default function LoginScreen() {
       style={styles.flex}
       behavior={Platform.select({ ios: 'padding', android: undefined })}>
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
-        keyboardShouldPersistTaps="handled">
-        <Text style={styles.hero}>Lost & Found</Text>
-        <Text style={styles.sub}>Sign in with your school email.</Text>
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <AuthHero title="Lost & Found" subtitle="Sign in with your school email to browse and post items." />
 
-        <AppTextField
-          label="Email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <AppTextField
-          label="Password"
-          secureTextEntry
-          autoComplete="password"
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.form}>
+          <AppTextField
+            label="Email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="your.email@usc.edu.ph"
+          />
+          <AppTextField
+            label="Password"
+            secureTextEntry
+            autoComplete="password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+          />
 
-        {error ? <Text style={styles.err}>{error}</Text> : null}
+          {error ? <Text style={styles.err}>{error}</Text> : null}
 
-        <AppButton title="Sign in" onPress={onSubmit} loading={loading} />
+          <AppButton title="Sign in" onPress={onSubmit} loading={loading} />
 
-        <Link href={'/(auth)/forgot-password' as Href} style={styles.linkCenter}>
-          <Text style={styles.link}>Forgot password?</Text>
-        </Link>
-
-        <View style={styles.row}>
-          <Text style={styles.muted}>No account? </Text>
-          <Link href={'/(auth)/register' as Href}>
-            <Text style={styles.link}>Register</Text>
+          <Link href={'/(auth)/forgot-password' as Href} style={styles.linkCenter}>
+            <Text style={styles.link}>Forgot password?</Text>
           </Link>
+
+          <View style={styles.row}>
+            <Text style={styles.muted}>No account? </Text>
+            <Link href={'/(auth)/register' as Href}>
+              <Text style={styles.link}>Register</Text>
+            </Link>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -89,17 +94,17 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: AppTheme.surface },
-  scroll: { paddingHorizontal: 24, paddingTop: 24 },
-  hero: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: AppTheme.primaryDark,
-    marginBottom: 8,
+  form: {
+    paddingHorizontal: AppTheme.spacing.lg,
+    backgroundColor: AppTheme.surfaceCard,
+    marginHorizontal: AppTheme.spacing.md,
+    borderRadius: AppTheme.radius.lg,
+    padding: AppTheme.spacing.lg,
+    ...AppTheme.cardShadow,
   },
-  sub: { fontSize: 15, color: AppTheme.textMuted, marginBottom: 28 },
   err: { color: AppTheme.danger, marginBottom: 12 },
-  link: { color: AppTheme.primary, fontWeight: '600', fontSize: 15 },
-  linkCenter: { alignSelf: 'center', marginTop: 16, marginBottom: 24 },
-  row: { flexDirection: 'row', justifyContent: 'center', marginTop: 8 },
-  muted: { fontSize: 15, color: AppTheme.textMuted },
+  link: { color: AppTheme.primary, fontWeight: '700', fontSize: 15 },
+  linkCenter: { alignSelf: 'center', marginTop: 16, marginBottom: 20 },
+  row: { flexDirection: 'row', justifyContent: 'center', marginTop: 4 },
+  muted: { fontSize: 15, color: AppTheme.textSecondary },
 });

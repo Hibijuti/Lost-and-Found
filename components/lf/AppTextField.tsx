@@ -1,5 +1,4 @@
 import { AppTheme } from '@/constants/appTheme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { StyleSheet, Text, TextInput, TextInputProps, View } from 'react-native';
 
 type Props = TextInputProps & {
@@ -7,20 +6,17 @@ type Props = TextInputProps & {
   error?: string;
 };
 
+/**
+ * High-contrast text fields — always uses light-theme colors so labels stay
+ * readable on white cards (avoids washed-out text when device is in dark mode).
+ */
 export function AppTextField({ label, error, style, ...rest }: Props) {
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
   return (
     <View style={styles.wrap}>
-      <Text style={[styles.label, isDark && { color: '#E2E8F0' }]}>{label}</Text>
+      <Text style={styles.label}>{label}</Text>
       <TextInput
-        placeholderTextColor={isDark ? AppTheme.textMutedDark : AppTheme.textMuted}
-        style={[
-          styles.input,
-          isDark && { backgroundColor: AppTheme.surfaceDark, color: '#F1F5F9', borderColor: AppTheme.borderDark },
-          error && styles.inputError,
-          style,
-        ]}
+        placeholderTextColor={AppTheme.inputPlaceholder}
+        style={[styles.input, error && styles.inputError, style]}
         {...rest}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -29,18 +25,25 @@ export function AppTextField({ label, error, style, ...rest }: Props) {
 }
 
 const styles = StyleSheet.create({
-  wrap: { marginBottom: 16 },
-  label: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#334155' },
+  wrap: { marginBottom: AppTheme.spacing.md },
+  label: {
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 8,
+    color: AppTheme.inputLabel,
+  },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: AppTheme.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderRadius: AppTheme.radius.md,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     fontSize: 16,
+    fontWeight: '600',
     backgroundColor: AppTheme.surfaceCard,
-    color: AppTheme.primaryDark,
+    color: AppTheme.inputText,
+    ...AppTheme.softShadow,
   },
   inputError: { borderColor: AppTheme.danger },
-  error: { marginTop: 4, fontSize: 13, color: AppTheme.danger },
+  error: { marginTop: 6, fontSize: 13, color: AppTheme.danger, fontWeight: '600' },
 });

@@ -1,4 +1,9 @@
 import { AuthProvider } from '@/context/AuthContext';
+import {
+  modalScreenOptions,
+  stackScreenDefaults,
+  tabsEnterOptions,
+} from '@/constants/navigation';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
@@ -19,14 +24,14 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <AuthProvider>
           <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack screenOptions={stackScreenDefaults}>
+              <Stack.Screen name="index" options={{ headerShown: false, animation: 'fade' }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false, animation: 'fade' }} />
+              <Stack.Screen name="(tabs)" options={tabsEnterOptions} />
               <Stack.Screen
                 name="item/[id]"
                 options={{
-                  presentation: 'modal',
+                  ...modalScreenOptions,
                   title: 'Item details',
                   headerShown: true,
                 }}
@@ -35,11 +40,12 @@ export default function RootLayout() {
                 name="admin"
                 options={{
                   title: 'Admin panel',
-                  headerBackTitle: 'Back',
+                  animation: 'slide_from_right',
+                  animationDuration: 280,
                 }}
               />
             </Stack>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
           </ThemeProvider>
         </AuthProvider>
       </SafeAreaProvider>

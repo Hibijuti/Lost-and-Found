@@ -1,13 +1,21 @@
 import { AppButton } from '@/components/lf/AppButton';
 import { AppTheme } from '@/constants/appTheme';
 import { useAuth } from '@/context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
+import type { ComponentProps } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-/**
- * Shows the signed-in user profile, role, and admin entry for admins only.
- */
+function initials(name: string) {
+  return name
+    .split(' ')
+    .map((p) => p[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 export default function ProfileTab() {
   const { userProfile, signOutUser } = useAuth();
   const router = useRouter();
@@ -23,20 +31,32 @@ export default function ProfileTab() {
   const isAdmin = userProfile.role === 'admin';
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll}>
-      <View style={styles.card}>
+    <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <View style={styles.heroCard}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{initials(userProfile.name)}</Text>
+        </View>
         <Text style={styles.name}>{userProfile.name}</Text>
-        <Text style={styles.role}>{userProfile.role}</Text>
+        <View style={[styles.rolePill, isAdmin && styles.roleAdmin]}>
+          <Ionicons
+            name={isAdmin ? 'shield-checkmark' : 'school'}
+            size={14}
+            color={isAdmin ? AppTheme.accent : AppTheme.textOnPrimary}
+          />
+          <Text style={styles.role}>{userProfile.role}</Text>
+        </View>
       </View>
 
-      <Field label="Student ID" value={userProfile.studentId} />
-      <Field label="Email" value={userProfile.email} />
-      <Field label="Phone" value={userProfile.phone || '—'} />
-      <Field label="Social" value={userProfile.socialLink || '—'} />
+      <Field icon="card-outline" label="Student ID" value={userProfile.studentId} />
+      <Field icon="mail-outline" label="Email" value={userProfile.email} />
+      <Field icon="call-outline" label="Phone" value={userProfile.phone || '—'} />
+      <Field icon="link-outline" label="Social" value={userProfile.socialLink || '—'} />
 
       {isAdmin ? (
         <Pressable style={styles.adminBtn} onPress={() => router.push('/admin' as Href)}>
+          <Ionicons name="settings-outline" size={22} color={AppTheme.textOnPrimary} />
           <Text style={styles.adminBtnText}>Open admin panel</Text>
+          <Ionicons name="chevron-forward" size={20} color={AppTheme.accent} />
         </Pressable>
       ) : null}
 
@@ -52,43 +72,102 @@ export default function ProfileTab() {
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({
+  icon,
+  label,
+  value,
+}: {
+  icon: ComponentProps<typeof Ionicons>['name'];
+  label: string;
+  value: string;
+}) {
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <Text style={styles.fieldValue}>{value}</Text>
+      <View style={styles.fieldIcon}>
+        <Ionicons name={icon} size={18} color={AppTheme.primary} />
+      </View>
+      <View style={styles.fieldBody}>
+        <Text style={styles.fieldLabel}>{label}</Text>
+        <Text style={styles.fieldValue}>{value}</Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: AppTheme.surface },
   muted: { color: AppTheme.textMuted },
-  scroll: { padding: 20, gap: 12, backgroundColor: AppTheme.surface },
-  card: {
+  scroll: { padding: AppTheme.spacing.md, paddingBottom: 32, gap: 12 },
+  heroCard: {
+    alignItems: 'center',
     backgroundColor: AppTheme.surfaceCard,
-    padding: 20,
-    borderRadius: 16,
+    paddingVertical: AppTheme.spacing.xl,
+    paddingHorizontal: AppTheme.spacing.lg,
+    borderRadius: AppTheme.radius.lg,
     borderWidth: 1,
     borderColor: AppTheme.border,
     ...AppTheme.cardShadow,
   },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: AppTheme.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: AppTheme.spacing.md,
+    borderWidth: 3,
+    borderColor: AppTheme.primary,
+  },
+  avatarText: { fontSize: 28, fontWeight: '800', color: AppTheme.primaryDark },
   name: { fontSize: 22, fontWeight: '800', color: AppTheme.primaryDark },
-  role: { marginTop: 4, fontSize: 14, fontWeight: '600', color: AppTheme.primary, textTransform: 'capitalize' },
+  rolePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: AppTheme.radius.full,
+    backgroundColor: AppTheme.primary,
+  },
+  roleAdmin: { backgroundColor: AppTheme.primaryDark },
+  role: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: AppTheme.textOnPrimary,
+    textTransform: 'capitalize',
+  },
   field: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
     backgroundColor: AppTheme.surfaceCard,
-    padding: 14,
-    borderRadius: 12,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.radius.md,
     borderWidth: 1,
     borderColor: AppTheme.border,
+    ...AppTheme.softShadow,
   },
-  fieldLabel: { fontSize: 12, color: AppTheme.textMuted, marginBottom: 4 },
-  fieldValue: { fontSize: 16, color: AppTheme.primaryDark },
-  adminBtn: {
-    backgroundColor: AppTheme.primary,
-    padding: 16,
-    borderRadius: 12,
+  fieldIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: AppTheme.surface,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  adminBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  fieldBody: { flex: 1 },
+  fieldLabel: { fontSize: 12, color: AppTheme.textSecondary, marginBottom: 2, fontWeight: '600' },
+  fieldValue: { fontSize: 16, color: AppTheme.primaryDark, fontWeight: '500' },
+  adminBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: AppTheme.primary,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.radius.md,
+    ...AppTheme.cardShadow,
+  },
+  adminBtnText: { flex: 1, color: AppTheme.textOnPrimary, fontWeight: '700', fontSize: 16 },
 });

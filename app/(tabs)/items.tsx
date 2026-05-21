@@ -1,13 +1,16 @@
+import { AnimatedListItem } from '@/components/lf/AnimatedListItem';
+import { AppTextField } from '@/components/lf/AppTextField';
+import { CategoryPicker } from '@/components/lf/CategoryPicker';
 import { EmptyState } from '@/components/lf/EmptyState';
+import { FilterChip } from '@/components/lf/FilterChip';
 import { ItemCard } from '@/components/lf/ItemCard';
 import { LoadingView } from '@/components/lf/LoadingView';
-import { AppTextField } from '@/components/lf/AppTextField';
 import { AppTheme } from '@/constants/appTheme';
 import { fetchItemsFiltered, type ItemStatus, type LostFoundItem } from '@/lib/items';
 import type { Href } from 'expo-router';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 
 const STATUS_OPTIONS: { key: ItemStatus | 'all'; label: string }[] = [
   { key: 'all', label: 'All' },
@@ -15,9 +18,6 @@ const STATUS_OPTIONS: { key: ItemStatus | 'all'; label: string }[] = [
   { key: 'found', label: 'Found' },
 ];
 
-/**
- * Browse all approved items with search and status filter.
- */
 export default function ItemsTab() {
   const router = useRouter();
   const [items, setItems] = useState<LostFoundItem[]>([]);
@@ -27,6 +27,7 @@ export default function ItemsTab() {
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState<ItemStatus | 'all'>('all');
   const [error, setError] = useState<string | null>(null);
+  const isFirstFilterRun = useRef(true);
 
   const load = useCallback(async () => {
     setError(null);
@@ -45,25 +46,24 @@ export default function ItemsTab() {
     }
   }, [status, search, category]);
 
-  useFocusEffect(
-    useCallback(() => {
-      setLoading(true);
-      load();
-    }, [load])
-  );
+  // Initial load
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const chips = useMemo(
-    () =>
-      STATUS_OPTIONS.map((opt) => (
-        <Pressable
-          key={opt.key}
-          onPress={() => setStatus(opt.key)}
-          style={[styles.chip, status === opt.key && styles.chipOn]}>
-          <Text style={[styles.chipText, status === opt.key && styles.chipTextOn]}>{opt.label}</Text>
-        </Pressable>
-      )),
-    [status]
-  );
+  // Auto-apply filters when search, category, or status changes (debounce search)
+  useEffect(() => {
+    if (isFirstFilterRun.current) {
+      isFirstFilterRun.current = false;
+      return;
+    }
+    const delay = search.trim() ? 400 : 0;
+    const timer = setTimeout(() => {
+      setRefreshing(true);
+      load();
+    }, delay);
+    return () => clearTimeout(timer);
+  }, [status, category, search, load]);
 
   if (loading && items.length === 0) {
     return <LoadingView message="Loading items…" />;
@@ -72,12 +72,29 @@ export default function ItemsTab() {
   return (
     <View style={styles.container}>
       <View style={styles.filters}>
-        <AppTextField label="Search" value={search} onChangeText={setSearch} placeholder="Name, place…" />
-        <AppTextField label="Category (optional)" value={category} onChangeText={setCategory} placeholder="e.g. Electronics" />
-        <View style={styles.row}>{chips}</View>
-        <Pressable style={styles.apply} onPress={() => { setLoading(true); load(); }}>
-          <Text style={styles.applyText}>Apply filters</Text>
-        </Pressable>
+        <AppTextField
+          label="Search"
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search item name, location, or description"
+        />
+        <CategoryPicker
+          label="Category"
+          value={category}
+          onChange={setCategory}
+          allowEmpty
+        />
+        <Text style={styles.filterLabel}>Status</Text>
+        <View style={styles.row}>
+          {STATUS_OPTIONS.map((opt) => (
+            <FilterChip
+              key={opt.key}
+              label={opt.label}
+              selected={status === opt.key}
+              onPress={() => setStatus(opt.key)}
+            />
+          ))}
+        </View>
       </View>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -93,17 +110,22 @@ export default function ItemsTab() {
               load();
             }}
             tintColor={AppTheme.primary}
+            colors={[AppTheme.primary]}
           />
         }
         contentContainerStyle={styles.list}
-        renderItem={({ item }) => (
-          <ItemCard
-            item={item}
-            onPress={() => router.push(`/item/${item.id}` as Href)}
-          />
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item, index }) => (
+          <AnimatedListItem index={index}>
+            <ItemCard item={item} onPress={() => router.push(`/item/${item.id}` as Href)} />
+          </AnimatedListItem>
         )}
         ListEmptyComponent={
-          <EmptyState title="No matches" hint="Try different keywords or clear filters." icon="search-outline" />
+          <EmptyState
+            title="No matches"
+            hint="Try different keywords or clear filters."
+            icon="search-outline"
+          />
         }
       />
     </View>
@@ -112,24 +134,22 @@ export default function ItemsTab() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: AppTheme.surface },
-  filters: { paddingHorizontal: 16, paddingTop: 8 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: '#E2E8F0',
+  filters: {
+    marginHorizontal: AppTheme.spacing.md,
+    marginTop: 4,
+    marginBottom: 8,
+    padding: AppTheme.spacing.md,
+    backgroundColor: AppTheme.surfaceCard,
+    borderRadius: AppTheme.radius.lg,
+    ...AppTheme.cardShadow,
   },
-  chipOn: { backgroundColor: AppTheme.primary },
-  chipText: { fontWeight: '600', color: '#334155' },
-  chipTextOn: { color: '#fff' },
-  apply: {
-    alignSelf: 'flex-start',
-    backgroundColor: AppTheme.surface,
-    paddingVertical: 8,
+  filterLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: AppTheme.inputLabel,
     marginBottom: 8,
   },
-  applyText: { color: AppTheme.primary, fontWeight: '700' },
-  list: { paddingHorizontal: 16, paddingBottom: 24 },
-  error: { color: AppTheme.danger, paddingHorizontal: 16 },
+  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  list: { paddingHorizontal: AppTheme.spacing.md, paddingBottom: 28 },
+  error: { color: AppTheme.danger, paddingHorizontal: AppTheme.spacing.md, fontWeight: '600' },
 });

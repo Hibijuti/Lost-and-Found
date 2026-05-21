@@ -4,8 +4,10 @@ import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 export function LoadingView({ message = 'Loading…' }: { message?: string }) {
   return (
     <View style={styles.center}>
-      <ActivityIndicator size="large" color={AppTheme.primary} />
-      <Text style={styles.msg}>{message}</Text>
+      <View style={styles.box}>
+        <ActivityIndicator size="large" color={AppTheme.primary} />
+        <Text style={styles.msg}>{message}</Text>
+      </View>
     </View>
   );
 }
@@ -16,7 +18,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-    gap: 12,
+    backgroundColor: AppTheme.surface,
   },
-  msg: { fontSize: 15, color: AppTheme.textMuted },
+  box: {
+    backgroundColor: AppTheme.surfaceCard,
+    paddingVertical: 32,
+    paddingHorizontal: 40,
+    borderRadius: AppTheme.radius.lg,
+    alignItems: 'center',
+    gap: 14,
+    ...AppTheme.cardShadow,
+  },
+  msg: { fontSize: 15, color: AppTheme.textSecondary, fontWeight: '500' },
 });

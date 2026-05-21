@@ -1,9 +1,18 @@
 import { AppButton } from '@/components/lf/AppButton';
 import { AppTextField } from '@/components/lf/AppTextField';
+import { AuthBackButton } from '@/components/lf/AuthBackButton';
 import { AppTheme } from '@/constants/appTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ForgotPasswordScreen() {
@@ -33,19 +42,29 @@ export default function ForgotPasswordScreen() {
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.select({ ios: 'padding', android: undefined })}>
-      <ScrollView contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <AuthBackButton />
+
+        <Text style={styles.title}>Forgot your password?</Text>
         <Text style={styles.sub}>
-          We will email you a link to reset your password (Firebase Auth handles delivery).
+          Enter your school email and we will send you a link to reset your password.
         </Text>
-        <AppTextField
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-        />
-        <AppButton title="Send reset link" onPress={onSubmit} loading={loading} />
+
+        <View style={styles.form}>
+          <AppTextField
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            placeholder="your.email@school.edu"
+          />
+          <AppButton title="Send reset link" onPress={onSubmit} loading={loading} variant="accent" />
+          <AuthBackButton label="Return to sign in" />
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -53,6 +72,25 @@ export default function ForgotPasswordScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: AppTheme.surface },
-  scroll: { paddingHorizontal: 24, paddingTop: 16 },
-  sub: { fontSize: 15, color: AppTheme.textMuted, marginBottom: 20, lineHeight: 22 },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: AppTheme.inputText,
+    marginHorizontal: AppTheme.spacing.lg,
+    marginBottom: 8,
+  },
+  sub: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: AppTheme.textSecondary,
+    marginHorizontal: AppTheme.spacing.lg,
+    marginBottom: AppTheme.spacing.lg,
+  },
+  form: {
+    marginHorizontal: AppTheme.spacing.md,
+    padding: AppTheme.spacing.lg,
+    backgroundColor: AppTheme.surfaceCard,
+    borderRadius: AppTheme.radius.lg,
+    ...AppTheme.cardShadow,
+  },
 });

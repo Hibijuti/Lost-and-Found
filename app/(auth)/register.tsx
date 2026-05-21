@@ -1,5 +1,6 @@
 import { AppButton } from '@/components/lf/AppButton';
 import { AppTextField } from '@/components/lf/AppTextField';
+import { AuthHero } from '@/components/lf/AuthHero';
 import { AppTheme } from '@/constants/appTheme';
 import { useAuth } from '@/context/AuthContext';
 import type { Href } from 'expo-router';
@@ -51,45 +52,69 @@ export default function RegisterScreen() {
       style={styles.flex}
       behavior={Platform.select({ ios: 'padding', android: undefined })}>
       <ScrollView
-        contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
-        keyboardShouldPersistTaps="handled">
-        <Text style={styles.lead}>Create your student profile. Default role is student; admins are assigned in Firebase.</Text>
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+        <AuthHero title="Join us" subtitle="Create your student profile to report and find items on campus." />
 
-        <AppTextField label="Full name" value={name} onChangeText={setName} autoCapitalize="words" />
-        <AppTextField label="Student ID" value={studentId} onChangeText={setStudentId} />
-        <AppTextField
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          autoComplete="email"
-        />
-        <AppTextField label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-        <AppTextField
-          label="Social link (optional)"
-          value={socialLink}
-          onChangeText={setSocialLink}
-          autoCapitalize="none"
-          placeholder="https://"
-        />
-        <AppTextField
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          autoComplete="password-new"
-        />
+        <View style={styles.form}>
+          
 
-        {error ? <Text style={styles.err}>{error}</Text> : null}
+          <AppTextField
+            label="Full name"
+            value={name}
+            onChangeText={setName}
+            autoCapitalize="words"
+            placeholder="Your full name"
+          />
+          <AppTextField
+            label="Student ID"
+            value={studentId}
+            onChangeText={setStudentId}
+            placeholder="School ID number"
+          />
+          <AppTextField
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoComplete="email"
+            placeholder="your.email@school.edu"
+          />
+          <AppTextField
+            label="Phone"
+            value={phone}
+            onChangeText={setPhone}
+            keyboardType="phone-pad"
+            placeholder="Mobile number"
+          />
+          <AppTextField
+            label="Social link (optional)"
+            value={socialLink}
+            onChangeText={setSocialLink}
+            autoCapitalize="none"
+            placeholder="https://instagram.com/username"
+          />
+          <AppTextField
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            autoComplete="password-new"
+            placeholder="At least 6 characters"
+          />
 
-        <AppButton title="Register" onPress={onSubmit} loading={loading} />
+          {error ? <Text style={styles.err}>{error}</Text> : null}
 
-        <View style={styles.row}>
-          <Text style={styles.muted}>Already have an account? </Text>
-          <Link href={'/(auth)/login' as Href}>
-            <Text style={styles.link}>Sign in</Text>
-          </Link>
+          <AppButton title="Create account" onPress={onSubmit} loading={loading} />
+
+          <View style={styles.row}>
+            <Text style={styles.muted}>Already have an account? </Text>
+            <Link href={'/(auth)/login' as Href}>
+              <Text style={styles.link}>Sign in</Text>
+            </Link>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -98,10 +123,16 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: AppTheme.surface },
-  scroll: { paddingHorizontal: 24, paddingTop: 16 },
-  lead: { fontSize: 14, color: AppTheme.textMuted, marginBottom: 16, lineHeight: 20 },
+  form: {
+    marginHorizontal: AppTheme.spacing.md,
+    padding: AppTheme.spacing.lg,
+    backgroundColor: AppTheme.surfaceCard,
+    borderRadius: AppTheme.radius.lg,
+    ...AppTheme.cardShadow,
+  },
+  lead: { fontSize: 13, color: AppTheme.textSecondary, marginBottom: AppTheme.spacing.md, lineHeight: 19 },
   err: { color: AppTheme.danger, marginBottom: 12 },
-  link: { color: AppTheme.primary, fontWeight: '600', fontSize: 15 },
+  link: { color: AppTheme.primary, fontWeight: '700', fontSize: 15 },
   row: { flexDirection: 'row', justifyContent: 'center', marginTop: 16 },
-  muted: { fontSize: 15, color: AppTheme.textMuted },
+  muted: { fontSize: 15, color: AppTheme.textSecondary },
 });

@@ -1,19 +1,29 @@
 import { AppButton } from '@/components/lf/AppButton';
 import { AppTextField } from '@/components/lf/AppTextField';
+import { DatePickerField } from '@/components/lf/DatePickerField';
+import { CategoryPicker } from '@/components/lf/CategoryPicker';
+import { StatusSegment } from '@/components/lf/StatusSegment';
 import { AppTheme } from '@/constants/appTheme';
 import { useAuth } from '@/context/AuthContext';
 import { uploadImageToCloudinary } from '@/lib/cloudinaryUpload';
 import { createItem, type ItemStatus } from '@/lib/items';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import {
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-/**
- * Report a lost or found item: pick photo → Cloudinary → Firestore doc (pending approval).
- */
 export default function PostTab() {
   const { userProfile, firebaseUser } = useAuth();
   const router = useRouter();
@@ -23,7 +33,6 @@ export default function PostTab() {
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
   const [status, setStatus] = useState<ItemStatus>('lost');
-  /** Keep picker metadata so Cloudinary gets correct MIME type (fixes many RN/Android upload errors). */
   const [pickedImage, setPickedImage] = useState<{
     uri: string;
     mimeType?: string | null;
@@ -56,8 +65,8 @@ export default function PostTab() {
       Alert.alert('Sign in required', 'Please sign in again.');
       return;
     }
-    if (!itemName.trim() || !description.trim() || !location.trim() || !date.trim()) {
-      Alert.alert('Missing fields', 'Fill in name, description, where, and date.');
+    if (!itemName.trim() || !category || !description.trim() || !location.trim() || !date) {
+      Alert.alert('Missing fields', 'Fill in all fields, pick a category, and select a date.');
       return;
     }
     if (!pickedImage?.uri) {
@@ -72,7 +81,7 @@ export default function PostTab() {
       });
       await createItem({
         itemName: itemName.trim(),
-        category: category.trim() || 'General',
+        category,
         description: description.trim(),
         location: location.trim(),
         date: date.trim(),
@@ -92,6 +101,7 @@ export default function PostTab() {
             setDescription('');
             setLocation('');
             setDate('');
+            setStatus('lost');
             setPickedImage(null);
             router.push('/(tabs)' as Href);
           },
@@ -106,67 +116,103 @@ export default function PostTab() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-      <Text style={styles.lead}>
-        Upload a clear photo. New posts stay hidden until an administrator approves them.
-      </Text>
+    <View style={styles.root}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.tipBox}>
+            <Ionicons name="information-circle" size={22} color={AppTheme.primary} />
+            <Text style={styles.lead}>
+              Upload a clear photo. New posts stay hidden until an administrator approves them.
+            </Text>
+          </View>
 
-      <Pressable style={styles.imagePick} onPress={pickImage}>
-        {pickedImage?.uri ? (
-          <Image source={{ uri: pickedImage.uri }} style={styles.preview} />
-        ) : (
-          <Text style={styles.imagePickText}>Tap to choose image</Text>
-        )}
-      </Pressable>
+          <Pressable style={styles.imagePick} onPress={pickImage}>
+            {pickedImage?.uri ? (
+              <Image source={{ uri: pickedImage.uri }} style={styles.preview} />
+            ) : (
+              <View style={styles.imagePickEmpty}>
+                <Ionicons name="camera" size={40} color={AppTheme.primary} />
+                <Text style={styles.imagePickText}>Tap to add photo</Text>
+              </View>
+            )}
+          </Pressable>
 
-      <AppTextField label="Item name" value={itemName} onChangeText={setItemName} />
-      <AppTextField label="Category" value={category} onChangeText={setCategory} placeholder="Wallet, ID, keys…" />
+          <AppTextField
+            label="Item name"
+            value={itemName}
+            onChangeText={setItemName}
+            placeholder="e.g. Black wallet, student ID card"
+          />
+          <CategoryPicker label="Category" value={category} onChange={setCategory} required />
+          <StatusSegment value={status} onChange={setStatus} />
 
-      <Text style={styles.label}>Status</Text>
-      <View style={styles.pickerWrap}>
-        <Picker selectedValue={status} onValueChange={(v) => setStatus(v as ItemStatus)}>
-          <Picker.Item label="Lost" value="lost" />
-          <Picker.Item label="Found" value="found" />
-        </Picker>
-      </View>
+          <AppTextField
+            label="Description"
+            value={description}
+            onChangeText={setDescription}
+            placeholder="Color, brand, and unique details"
+            multiline
+            style={{ minHeight: 100, textAlignVertical: 'top' }}
+          />
+          <AppTextField
+            label="Location"
+            value={location}
+            onChangeText={setLocation}
+            placeholder="Building, room, or campus area"
+          />
+          <DatePickerField label="Date (when lost/found)" value={date} onChange={setDate} />
 
-      <AppTextField
-        label="Description"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        style={{ minHeight: 100, textAlignVertical: 'top' }}
-      />
-      <AppTextField label="Location" value={location} onChangeText={setLocation} placeholder="Building, room, desk…" />
-      <AppTextField label="Date (when lost/found)" value={date} onChangeText={setDate} placeholder="e.g. 2026-05-01" />
-
-      <AppButton title="Submit listing" onPress={onSubmit} loading={submitting} />
-    </ScrollView>
+          <AppButton title="Submit listing" onPress={onSubmit} loading={submitting} />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { padding: 20, paddingBottom: 40, backgroundColor: AppTheme.surfaceCard },
-  lead: { fontSize: 14, color: AppTheme.textMuted, marginBottom: 16, lineHeight: 20 },
-  imagePick: {
-    height: 180,
-    borderRadius: 14,
+  root: {
+    flex: 1,
     backgroundColor: AppTheme.surface,
-    borderWidth: 1,
+  },
+  flex: { flex: 1 },
+  scroll: {
+    flexGrow: 1,
+    padding: AppTheme.spacing.md,
+    paddingBottom: 40,
+  },
+  tipBox: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+    backgroundColor: AppTheme.surfaceCard,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.radius.md,
+    marginBottom: AppTheme.spacing.md,
+    borderLeftWidth: 4,
+    borderLeftColor: AppTheme.primary,
+    ...AppTheme.softShadow,
+  },
+  lead: { flex: 1, fontSize: 14, color: AppTheme.textSecondary, lineHeight: 21 },
+  imagePick: {
+    height: 200,
+    borderRadius: AppTheme.radius.lg,
+    backgroundColor: AppTheme.surfaceCard,
+    borderWidth: 2,
     borderColor: AppTheme.border,
+    borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: AppTheme.spacing.lg,
     overflow: 'hidden',
+    ...AppTheme.softShadow,
   },
+  imagePickEmpty: { alignItems: 'center', gap: 8 },
   preview: { width: '100%', height: '100%' },
-  imagePickText: { color: AppTheme.primary, fontWeight: '600' },
-  label: { fontSize: 14, fontWeight: '600', marginBottom: 6, color: '#334155' },
-  pickerWrap: {
-    borderWidth: 1,
-    borderColor: AppTheme.border,
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: 'hidden',
-  },
+  imagePickText: { color: AppTheme.primary, fontWeight: '700', fontSize: 15 },
 });
