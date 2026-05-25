@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
   },
   triggerPlaceholder: {
     color: AppTheme.inputPlaceholder,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   panel: {
     flexDirection: 'row',

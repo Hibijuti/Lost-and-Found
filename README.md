@@ -1,6 +1,6 @@
-# Welcome to your Expo app 👋
+# Lost & Found App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+School lost-and-found mobile app (React Native, Expo, Firebase, Cloudinary).
 
 ## Get started
 
@@ -24,6 +24,26 @@ In the output, you'll find options to open the app in a
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+
+### Environment
+
+1. Copy `.env.example` to `.env` and add your Firebase Web config.
+2. Set `CLOUDINARY_CLOUD_NAME` and `CLOUDINARY_UPLOAD_PRESET` in `constants/cloudinary.ts`.
+
+## Build an Android APK
+
+See **[docs/BUILD_APK.md](docs/BUILD_APK.md)** for full steps.
+
+Quick version:
+
+```bash
+npm install -g eas-cli
+eas login
+eas init
+npm run build:apk
+```
+
+Add `EXPO_PUBLIC_FIREBASE_*` variables in the Expo dashboard (preview environment) before building, or the release APK will not connect to Firebase.
 
 ## Get a fresh project
 

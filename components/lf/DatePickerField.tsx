@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     color: AppTheme.inputPlaceholder,
+    fontWeight: '500',
   },
   isoHint: {
     marginTop: 4,

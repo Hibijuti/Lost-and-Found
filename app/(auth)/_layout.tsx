@@ -11,6 +11,7 @@ export default function AuthLayout() {
         options={{
           ...authHeaderOptions,
           title: 'Reset password',
+          headerBackTitle: 'Sign in',
           animation: 'slide_from_right',
         }}
       />

@@ -34,8 +34,9 @@ export const AppTheme = {
   /** Form fields — WCAG-friendly contrast on light green + white cards */
   inputLabel: '#012214',
   inputText: '#000000',
-  inputPlaceholder: '#1F3D30',
-  placeholder: '#1F3D30',
+  /** Muted placeholder — clearly distinct from typed input */
+  inputPlaceholder: '#8A9A92',
+  placeholder: '#8A9A92',
   badgeLostBg: '#FFF3CD',
   badgeFoundBg: '#C8E6D0',
   headerGradient: [Brand.funGreen, Brand.funGreenLight] as const,

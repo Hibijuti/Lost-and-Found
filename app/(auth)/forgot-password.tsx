@@ -1,6 +1,5 @@
 import { AppButton } from '@/components/lf/AppButton';
 import { AppTextField } from '@/components/lf/AppTextField';
-import { AuthBackButton } from '@/components/lf/AuthBackButton';
 import { AppTheme } from '@/constants/appTheme';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
@@ -45,8 +44,6 @@ export default function ForgotPasswordScreen() {
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
-        <AuthBackButton />
-
         <Text style={styles.title}>Forgot your password?</Text>
         <Text style={styles.sub}>
           Enter your school email and we will send you a link to reset your password.
@@ -63,7 +60,6 @@ export default function ForgotPasswordScreen() {
             placeholder="your.email@school.edu"
           />
           <AppButton title="Send reset link" onPress={onSubmit} loading={loading} variant="accent" />
-          <AuthBackButton label="Return to sign in" />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -77,6 +73,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: AppTheme.inputText,
     marginHorizontal: AppTheme.spacing.lg,
+    marginTop: AppTheme.spacing.sm,
     marginBottom: 8,
   },
   sub: {

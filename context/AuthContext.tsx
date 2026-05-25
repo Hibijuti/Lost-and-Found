@@ -7,7 +7,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from 'firebase/auth';
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 export type UserRole = 'student' | 'admin';
@@ -19,8 +19,16 @@ export type UserProfile = {
   email: string;
   phone: string;
   socialLink: string;
+  photoUrl?: string;
   role: UserRole;
   createdAt?: unknown;
+};
+
+export type ProfileUpdateInput = {
+  name: string;
+  phone: string;
+  socialLink: string;
+  photoUrl?: string;
 };
 
 type AuthContextValue = {
@@ -28,6 +36,7 @@ type AuthContextValue = {
   userProfile: UserProfile | null;
   loading: boolean;
   refreshProfile: () => Promise<void>;
+  updateProfile: (input: ProfileUpdateInput) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (params: {
     email: string;
@@ -63,6 +72,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const profile = await fetchUserProfile(uid);
     setUserProfile(profile);
   }, []);
+
+  const updateProfile = useCallback(
+    async (input: ProfileUpdateInput) => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) throw new Error('You must be signed in to update your profile.');
+
+      const patch: Record<string, string> = {
+        name: input.name.trim(),
+        phone: input.phone.trim(),
+        socialLink: input.socialLink.trim(),
+      };
+      if (input.photoUrl !== undefined) {
+        patch.photoUrl = input.photoUrl;
+      }
+
+      await updateDoc(doc(db, 'users', uid), patch);
+
+      // Update local state immediately so UI reflects changes without reload
+      setUserProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              name: patch.name,
+              phone: patch.phone,
+              socialLink: patch.socialLink,
+              ...(input.photoUrl !== undefined ? { photoUrl: input.photoUrl } : {}),
+            }
+          : prev
+      );
+
+      const fresh = await fetchUserProfile(uid);
+      if (fresh) setUserProfile(fresh);
+    },
+    []
+  );
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -100,6 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: params.email.trim().toLowerCase(),
         phone: params.phone.trim(),
         socialLink: params.socialLink.trim(),
+        photoUrl: '',
         role: 'student',
         createdAt: serverTimestamp(),
       };
@@ -122,6 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       userProfile,
       loading,
       refreshProfile,
+      updateProfile,
       signIn,
       signUp,
       signOutUser,
@@ -132,6 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       userProfile,
       loading,
       refreshProfile,
+      updateProfile,
       signIn,
       signUp,
       signOutUser,

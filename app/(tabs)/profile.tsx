@@ -2,6 +2,7 @@ import { AppButton } from '@/components/lf/AppButton';
 import { AppTheme } from '@/constants/appTheme';
 import { useAuth } from '@/context/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import type { Href } from 'expo-router';
 import { useRouter } from 'expo-router';
 import type { ComponentProps } from 'react';
@@ -29,13 +30,22 @@ export default function ProfileTab() {
   }
 
   const isAdmin = userProfile.role === 'admin';
+  const hasPhoto = Boolean(userProfile.photoUrl?.trim());
 
   return (
     <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
       <View style={styles.heroCard}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{initials(userProfile.name)}</Text>
-        </View>
+        {hasPhoto ? (
+          <Image
+            source={{ uri: userProfile.photoUrl }}
+            style={styles.avatarImage}
+            contentFit="cover"
+          />
+        ) : (
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initials(userProfile.name)}</Text>
+          </View>
+        )}
         <Text style={styles.name}>{userProfile.name}</Text>
         <View style={[styles.rolePill, isAdmin && styles.roleAdmin]}>
           <Ionicons
@@ -46,6 +56,14 @@ export default function ProfileTab() {
           <Text style={styles.role}>{userProfile.role}</Text>
         </View>
       </View>
+
+      <Pressable
+        style={styles.editBtn}
+        onPress={() => router.push('/edit-profile' as Href)}>
+        <Ionicons name="create-outline" size={22} color={AppTheme.textOnPrimary} />
+        <Text style={styles.editBtnText}>Edit profile</Text>
+        <Ionicons name="chevron-forward" size={20} color={AppTheme.accent} />
+      </Pressable>
 
       <Field icon="card-outline" label="Student ID" value={userProfile.studentId} />
       <Field icon="mail-outline" label="Email" value={userProfile.email} />
@@ -119,6 +137,14 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: AppTheme.primary,
   },
+  avatarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: AppTheme.spacing.md,
+    borderWidth: 3,
+    borderColor: AppTheme.primary,
+  },
   avatarText: { fontSize: 28, fontWeight: '800', color: AppTheme.primaryDark },
   name: { fontSize: 22, fontWeight: '800', color: AppTheme.primaryDark },
   rolePill: {
@@ -138,6 +164,16 @@ const styles = StyleSheet.create({
     color: AppTheme.textOnPrimary,
     textTransform: 'capitalize',
   },
+  editBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: AppTheme.primaryLight,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.radius.md,
+    ...AppTheme.cardShadow,
+  },
+  editBtnText: { flex: 1, color: AppTheme.textOnPrimary, fontWeight: '700', fontSize: 16 },
   field: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -159,7 +195,7 @@ const styles = StyleSheet.create({
   },
   fieldBody: { flex: 1 },
   fieldLabel: { fontSize: 12, color: AppTheme.textSecondary, marginBottom: 2, fontWeight: '600' },
-  fieldValue: { fontSize: 16, color: AppTheme.primaryDark, fontWeight: '500' },
+  fieldValue: { fontSize: 16, color: AppTheme.inputText, fontWeight: '600' },
   adminBtn: {
     flexDirection: 'row',
     alignItems: 'center',

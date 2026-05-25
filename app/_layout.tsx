@@ -37,6 +37,14 @@ export default function RootLayout() {
                 }}
               />
               <Stack.Screen
+                name="edit-profile"
+                options={{
+                  title: 'Edit profile',
+                  animation: 'slide_from_right',
+                  animationDuration: 280,
+                }}
+              />
+              <Stack.Screen
                 name="admin"
                 options={{
                   title: 'Admin panel',
