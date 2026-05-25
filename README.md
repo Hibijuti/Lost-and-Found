@@ -142,40 +142,6 @@ Then press `a` for Android emulator, `i` for iOS simulator, or scan the QR code 
 
 ---
 
-## Firestore data model
-
-### `users` collection (document ID = Firebase Auth `uid`)
-
-| Field | Type | Notes |
-|-------|------|--------|
-| `uid` | string | Same as document ID |
-| `name` | string | Display name |
-| `studentId` | string | Read-only after registration |
-| `email` | string | Read-only in app |
-| `phone` | string | |
-| `socialLink` | string | Optional URL |
-| `photoUrl` | string | Optional (Cloudinary) |
-| `role` | string | `student` or `admin` |
-| `createdAt` | timestamp | |
-
-### `items` collection
-
-| Field | Type | Notes |
-|-------|------|--------|
-| `itemName` | string | |
-| `category` | string | e.g. Electronics, Clothing |
-| `description` | string | |
-| `location` | string | |
-| `date` | string | `YYYY-MM-DD` |
-| `imageUrl` | string | Cloudinary URL |
-| `status` | string | `lost` or `found` |
-| `postedBy` | string | User `uid` |
-| `posterName` | string | |
-| `posterEmail` | string | |
-| `posterPhone` | string | |
-| `claimed` | boolean | |
-| `approved` | boolean | `false` until admin approves |
-| `createdAt` | timestamp | |
 
 ### Promote an admin
 
